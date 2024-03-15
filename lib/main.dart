@@ -99,28 +99,28 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '$_authCode',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headline6,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '$_userInfo',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headline6,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '$_payment',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headline6,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               '$_status',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headline6,
             ),
           ),
         ],
