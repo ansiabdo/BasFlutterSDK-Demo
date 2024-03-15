@@ -154,10 +154,10 @@ class _MyHomePageState extends State<MyHomePage> {
             _userInfo = userInfo.toString();
           });
           LOGW('BasSDK UserInfo Data');
-          LOGW(userInfo.toString());
+          LOGW(userInfo.toRawJson());
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('BasSDK UserInfo Data :${userInfo.toString()}'),
+              content: Text('BasSDK UserInfo Data :${userInfo.toRawJson()}'),
               backgroundColor: Colors.green,
             ),
           );
