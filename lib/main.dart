@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:bas_sdk/bas_sdk.dart';
+import 'package:bas_sdk_flutter_demo/model/UserInfo.dart';
 import 'package:bas_sdk_flutter_demo/rest_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +9,8 @@ import 'package:http/http.dart' as http;
 
 import 'Common.dart';
 import 'UIData.dart';
+import 'model/InitiateTransactionResponse.dart';
+import 'model/OrderCheckOut.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,16 +55,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   final RestClient restClient = RestClient(
     httpClient: http.Client(),
   );
   BasSDK bas = BasSDK();
 
   String _authCode = 'AuthId:';
-  String _payment = '';
-  String _status = '';
-  String _userInfo = 'UserInfo:';
+  String? _orderId;
+  InitiateTransactionResponseBody _transaction =
+      InitiateTransactionResponseBody();
+  String? _status;
+  UserInfo _userInfo = UserInfo();
+  String trxToken = '';
 
   @override
   Widget build(BuildContext context) {
@@ -76,10 +83,13 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 FilledButton(
                     onPressed: onLogin, child: const Text("BasGate Auth")),
+                const SizedBox(
+                  width: 16,
+                ),
                 FilledButton(
                   onPressed: onPayment,
                   child: const Text("BasGate Payment"),
@@ -91,36 +101,38 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                  onPressed: onLogin, child: const Text("BasGate Status")),
+                  onPressed: onStatus, child: const Text("BasGate Status")),
             ],
           ),
-          Spacer(),
+          const SizedBox(
+            height: 32,
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '$_authCode',
-              style: Theme.of(context).textTheme.caption,
+              _authCode,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '$_userInfo',
-              style: Theme.of(context).textTheme.caption,
+              _userInfo.toRawJson(),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '$_payment',
-              style: Theme.of(context).textTheme.caption,
+              _transaction.toRawJson(),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '$_status',
-              style: Theme.of(context).textTheme.caption,
+              _status ?? '',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
         ],
@@ -134,14 +146,16 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     try {
       BasSDK bas = BasSDK();
-      var data = await bas.fetchAuthCode(clientId: UIData.YKBClientId);
+      var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
       LOGW(data.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('BasSDK Auth Data :${data.toString()}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('BasSDK Auth Data :${data.toString()}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
       if (data != null) {
         setState(() {
           _authCode = 'AuthId :${data.data!.authId!}';
@@ -149,12 +163,12 @@ class _MyHomePageState extends State<MyHomePage> {
         LOGW("BasAuthCode Ready");
         var userInfo = await restClient.getUserInfo(authId: data.data!.authId!);
 
-        if (userInfo != null) {
-          setState(() {
-            _userInfo = userInfo.toRawJson();
-          });
-          LOGW('BasSDK UserInfo Data');
-          LOGW(userInfo.toRawJson());
+        setState(() {
+          _userInfo = userInfo;
+        });
+        LOGW('BasSDK UserInfo Data');
+        LOGW(userInfo.toRawJson());
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('BasSDK UserInfo Data :${userInfo.toRawJson()}'),
@@ -163,31 +177,127 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         }
       } else {
-        LOGW('ERROR BasSDK Data is null : ' + data.toString());
+        LOGW('ERROR BasSDK Data is null : $data');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('ERROR BasSDK Data is null :${data.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      LOGW('ERROR BasSDK : $e');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('ERROR BasSDK Data is null :${data.toString()}'),
+            content: Text('ERROR BasSDK :${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      LOGW('ERROR BasSDK : ' + e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('ERROR BasSDK :${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
   onPayment() async {
-    if (kDebugMode) {
-      print("onPayment");
-    }
+    LOGW("onPayment");
+    try {
+      var order = OrderCheckOut(
+          orderDetails: [
+            OrderDetail(
+              product: 'Product',
+              type: 'Type',
+              price: 1000,
+              qty: 1,
+              subTotalPrice: 1000,
+            ),
+          ],
+          paymentProvider: 'BAS_GATE',
+          customerInfo: _userInfo.data,
+          amount: OrderAmount(currency: 'YER', value: 1000),
+          orderId: getOrderId());
 
-    var data = await bas.payment(
-        amount: '1000', orderId: '10001', trxToken: '', appId: UIData.YKBAPPId);
+      var initTrans = await restClient.getPayment(order: order);
+      trxToken = initTrans.body!.trxToken!;
+      LOGW(initTrans.toRawJson());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('BasSDK initTrans Data :${initTrans.toRawJson()}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        setState(() {
+          _transaction = initTrans.body!;
+        });
+      }
+
+      var data = await bas.payment(
+          amount: initTrans.body!.order!.amount!.value.toString(),
+          orderId: getOrderId(),
+          trxToken: trxToken,
+          appId: UIData.BASAPPId);
+      LOGW(data.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('BasSDK payment Data :${data.toString()}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } on Exception catch (e) {
+      LOGW('ERROR onPayment : $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ERROR onPayment :${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  onStatus() async {
+    if (kDebugMode) {
+      print("onStatus");
+    }
+    try {
+      var orderStatus = await restClient.getStatus(orderId: getOrderId());
+      LOGW(orderStatus.toRawJson());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('BasSDK orderStatus Data :${orderStatus.toRawJson()}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      setState(() {
+        _transaction = orderStatus.body!;
+      });
+    } on Exception catch (e) {
+      LOGW('ERROR onStatus : $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ERROR onStatus :${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  getOrderId() {
+    if (_orderId != null && _orderId!.isNotEmpty && _orderId!.length > 1) {
+      return _orderId;
+    }
+    var random = Random();
+    _orderId = '1111${random.nextInt(1000000)}';
+    return _orderId;
   }
 }

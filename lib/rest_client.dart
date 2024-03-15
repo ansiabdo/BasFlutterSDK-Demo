@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:bas_sdk_flutter_demo/Common.dart';
+import 'package:bas_sdk_flutter_demo/model/OrderCheckOut.dart';
 import 'package:http/http.dart' as http;
 
-import 'UserInfo.dart';
+import 'model/InitiateTransactionResponse.dart';
+import 'model/UserInfo.dart';
 import 'api_response.dart';
 
 class RestClient {
@@ -12,7 +15,7 @@ class RestClient {
   final http.Client httpClient;
 
   Future<UserInfo> getUserInfo({required String authId}) async {
-    final loginUrl = '$baseUrl/auth/userinfo';
+    const loginUrl = '$baseUrl/auth/userinfo';
     final loginResult = await postAsync<dynamic>(loginUrl, {"authid": authId});
 
     if (!loginResult.success!) {
@@ -21,15 +24,26 @@ class RestClient {
     return UserInfo.fromJson(loginResult.result);
   }
 
-  Future<dynamic> getPayment({required String authId}) async {
-    final loginUrl = '$baseUrl/order/checkout';
-    final loginResult =
-        await this.postAsync<dynamic>(loginUrl, {"authid": authId});
+  Future<InitiateTransactionResponse> getPayment(
+      {required OrderCheckOut order}) async {
+    const url = '$baseUrl/order/checkout';
+    final result = await postAsync<dynamic>(url, order);
 
-    if (!loginResult.success!) {
-      throw Exception(loginResult.error);
+    if (!result.success!) {
+      throw Exception(result.error);
     }
-    return loginResult.result;
+    return InitiateTransactionResponse.fromJson(result.result);
+  }
+
+  Future<InitiateTransactionResponse> getStatus(
+      {required String orderId}) async {
+    var url = '$baseUrl/order/status/$orderId';
+    final result = await getAsync<dynamic>(url);
+
+    if (!result.success!) {
+      throw Exception(result.error);
+    }
+    return InitiateTransactionResponse.fromJson(result.result);
   }
 
   // utils
@@ -37,9 +51,9 @@ class RestClient {
   Future<ApiResponse<T?>> getAsync<T>(String resourcePath) async {
     var url = Uri.parse(resourcePath);
 
-    print('resourcePath : ' + resourcePath);
+    LOGW('resourcePath : $resourcePath');
 
-    var response = await this.httpClient.get(url, headers: {
+    var response = await httpClient.get(url, headers: {
       'Content-type': 'application/json',
       'Accept': 'application/json',
     });
@@ -56,7 +70,7 @@ class RestClient {
       'Accept': 'application/json',
     };
 
-    print('resourcePath : ' + resourcePath);
+    LOGW('resourcePath : $resourcePath');
 
     var url = Uri.parse(resourcePath);
 
@@ -83,7 +97,7 @@ class RestClient {
       var jsonResult = response.body;
       dynamic parsedJson = jsonDecode(jsonResult);
 
-      print(jsonResult);
+      LOGW(jsonResult);
 
       var output = ApiResponse<T?>(
         result: parsedJson,
