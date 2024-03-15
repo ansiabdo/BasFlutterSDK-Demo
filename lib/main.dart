@@ -56,6 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
   );
   BasSDK bas = BasSDK();
 
+  String _authCode = 'AuthId:';
+  String _payment = '';
+  String _status = '';
+  String _userInfo = 'UserInfo:';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,49 +68,62 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Column(
-                    children: [
-                      ElevatedButton(
-                          onPressed: onLogin,
-                          child: const Text("BasGate Auth")),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      FilledButton(
-                        onPressed: onPayment,
-                        child: const Text("BasGate Payment"),
-                      )
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      ElevatedButton(
-                          onPressed: onLogin,
-                          child: const Text("BasGate Status")),
-                    ],
-                  ),
-                ],
-              ),
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                '$_counter',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                FilledButton(
+                    onPressed: onLogin, child: const Text("BasGate Auth")),
+                FilledButton(
+                  onPressed: onPayment,
+                  child: const Text("BasGate Payment"),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: onLogin, child: const Text("BasGate Status")),
             ],
           ),
-        ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '$_authCode',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '$_userInfo',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '$_payment',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              '$_status',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -117,10 +135,33 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.YKBClientId);
-      LOGW(data);
+      LOGW(data.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('BasSDK Auth Data :${data.toString()}'),
+          backgroundColor: Colors.green,
+        ),
+      );
       if (data != null) {
+        setState(() {
+          _authCode = 'AuthId :${data.data!.authId!}';
+        });
         LOGW("BasAuthCode Ready");
-        await restClient.getUserInfo(authId: data.data!.authId!);
+        var userInfo = await restClient.getUserInfo(authId: data.data!.authId!);
+
+        if (userInfo != null) {
+          setState(() {
+            _userInfo = userInfo.toString();
+          });
+          LOGW('BasSDK UserInfo Data');
+          LOGW(userInfo.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('BasSDK UserInfo Data :${userInfo.toString()}'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } else {
         LOGW('ERROR BasSDK Data is null : ' + data.toString());
         ScaffoldMessenger.of(context).showSnackBar(

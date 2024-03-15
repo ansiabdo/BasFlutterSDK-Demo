@@ -14,3 +14,11 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+
+```bash
+flutter clean ;  flutter build bundle ; flutter build web --no-tree-shake-icons --release --web-renderer html ;firebase deploy --only hosting:basfluttersdk
+```
+```bash
+flutter run -d chrome 
+```

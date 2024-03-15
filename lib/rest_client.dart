@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'UserInfo.dart';
 import 'api_response.dart';
 
 class RestClient {
@@ -10,18 +11,17 @@ class RestClient {
   static const String baseUrl = 'https://bas-node-sdk.onrender.com';
   final http.Client httpClient;
 
-  Future<dynamic> getUserInfo({required String authId}) async {
+  Future<UserInfo> getUserInfo({required String authId}) async {
     final loginUrl = '$baseUrl/auth/userinfo';
-    final loginResult =
-        await this.postAsync<dynamic>(loginUrl, {"authid": authId});
+    final loginResult = await postAsync<dynamic>(loginUrl, {"authid": authId});
 
     if (!loginResult.success!) {
       throw Exception(loginResult.error);
     }
-    return loginResult.result;
+    return UserInfo.fromJson(loginResult.result);
   }
 
- Future<dynamic> getPayment({required String authId}) async {
+  Future<dynamic> getPayment({required String authId}) async {
     final loginUrl = '$baseUrl/order/checkout';
     final loginResult =
         await this.postAsync<dynamic>(loginUrl, {"authid": authId});
@@ -86,20 +86,18 @@ class RestClient {
       print(jsonResult);
 
       var output = ApiResponse<T?>(
-        result: parsedJson["result"],
-        success: parsedJson["success"],
-        unAuthorizedRequest: parsedJson['unAuthorizedRequest'],
+        result: parsedJson,
+        success: response.statusCode == 200,
       );
 
       if (!output.success!) {
-        output.error = parsedJson["error"]["message"];
+        output.error = parsedJson["messages"];
       }
       return output;
     } catch (e) {
       return ApiResponse<T?>(
           result: null,
           success: false,
-          unAuthorizedRequest: false,
           error: 'Something went wrong. Please try again');
     }
   }
