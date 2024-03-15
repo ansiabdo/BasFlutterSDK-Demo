@@ -151,7 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         if (userInfo != null) {
           setState(() {
-            _userInfo = userInfo.toString();
+            _userInfo = userInfo.toRawJson();
           });
           LOGW('BasSDK UserInfo Data');
           LOGW(userInfo.toRawJson());
