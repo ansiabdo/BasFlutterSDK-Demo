@@ -31,3 +31,5 @@ jobs:
           channelId: live
           projectId: ykbbas
           target: basfluttersdk
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
