@@ -36,7 +36,7 @@ class RestClient {
     }
     LOGW("getPayment return result : ${result.success}");
 
-    return result.result;
+    return InitiateTransactionResponse.fromJson(result.result);
   }
 
   Future<InitiateTransactionResponse> getStatus(

@@ -61,25 +61,21 @@ class _MyHomePageState extends State<MyHomePage> {
   );
   BasSDK bas = BasSDK();
 
-  String _authCode = 'AuthId:';
+  String _authCode = '';
   String? _orderId;
   InitiateTransactionResponse _transaction = InitiateTransactionResponse();
-  String? _status;
+  InitiateTransactionResponse _status = InitiateTransactionResponse();
   UserInfo _userInfo = UserInfo();
   String trxToken = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
+        ),
+        body: ListView(children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -110,34 +106,32 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              _authCode,
+              "AuthId : $_authCode",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              _userInfo.toRawJson(),
+              "User Info : ${_userInfo.toRawJson()}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              _transaction.toRawJson(),
+              "Transaction Data : ${_transaction.toRawJson()}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              _status ?? '',
+              "Order Status : ${_status.toRawJson()}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
-        ],
-      ),
-    );
+        ]));
   }
 
   onLogin() async {
@@ -222,6 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
       var initTrans = await restClient.getPayment(order: order);
       LOGW("initTrans : $initTrans");
       LOGW("json.encode(initTrans) : ${json.encode(initTrans)}");
+
       trxToken = initTrans.trxToken!;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -240,11 +235,11 @@ class _MyHomePageState extends State<MyHomePage> {
           orderId: getOrderId(),
           trxToken: trxToken,
           appId: UIData.BASAPPId);
-      LOGW(data.toString());
+      LOGW("bas.payment : $data");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('BasSDK payment Data :${data.toString()}'),
+            content: Text('BasSDK payment Data :$data'),
             backgroundColor: Colors.green,
           ),
         );
@@ -263,9 +258,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   onStatus() async {
-    if (kDebugMode) {
-      print("onStatus");
-    }
+    LOGW("onStatus");
+
     try {
       var orderStatus = await restClient.getStatus(orderId: getOrderId());
       LOGW(orderStatus.toRawJson());
@@ -279,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
       setState(() {
-        _transaction = orderStatus;
+        _status = orderStatus;
       });
     } on Exception catch (e) {
       LOGW('ERROR onStatus : $e');
