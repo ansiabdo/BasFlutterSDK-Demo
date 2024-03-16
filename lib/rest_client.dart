@@ -28,11 +28,15 @@ class RestClient {
       {required OrderCheckOut order}) async {
     const url = '$baseUrl/order/checkout';
     final result = await postAsync<dynamic>(url, order);
+    LOGW("getPayment result : ${result.success}");
 
     if (!result.success!) {
+      LOGW("ERROR getPayment ");
       throw Exception(result.error);
     }
-    return InitiateTransactionResponse.fromJson(result.result);
+    LOGW("getPayment return result : ${result.success}");
+
+    return result.result;
   }
 
   Future<InitiateTransactionResponse> getStatus(
@@ -41,6 +45,7 @@ class RestClient {
     final result = await getAsync<dynamic>(url);
 
     if (!result.success!) {
+      LOGW("ERROR getStatus result.error :${result.error}");
       throw Exception(result.error);
     }
     return InitiateTransactionResponse.fromJson(result.result);
@@ -97,18 +102,24 @@ class RestClient {
       var jsonResult = response.body;
       dynamic parsedJson = jsonDecode(jsonResult);
 
-      LOGW(jsonResult);
+      LOGW("jsonResult : $jsonResult");
+      LOGW("response.statusCode : ${response.statusCode}");
 
       var output = ApiResponse<T?>(
         result: parsedJson,
         success: response.statusCode == 200,
       );
+      LOGW("response.statusCode output : ${response.statusCode}");
 
       if (!output.success!) {
-        output.error = parsedJson["messages"];
+        output.error = parsedJson["messages"] ??
+            'ERROR Something went wrong. Please try again';
       }
+      LOGW("response.statusCode return output : ${response.statusCode}");
+
       return output;
     } catch (e) {
+      LOGW("ERROR processResponse : $e");
       return ApiResponse<T?>(
           result: null,
           success: false,

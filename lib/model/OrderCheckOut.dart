@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:bas_sdk_flutter_demo/model/UserInfo.dart';
 

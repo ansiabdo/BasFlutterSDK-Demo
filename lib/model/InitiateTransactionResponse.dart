@@ -1,111 +1,76 @@
 import 'dart:convert';
 
 class InitiateTransactionResponse {
-  Head? head;
-  InitiateTransactionResponseBody? body;
-  int? status;
-  String? code;
-  List<String>? messages;
-
-  InitiateTransactionResponse({
-    this.head,
-    this.body,
-    this.status,
-    this.code,
-    this.messages,
-  });
-
-  factory InitiateTransactionResponse.fromRawJson(String str) =>
-      InitiateTransactionResponse.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory InitiateTransactionResponse.fromJson(Map<String, dynamic> json) =>
-      InitiateTransactionResponse(
-        head: json["head"] == null ? null : Head.fromJson(json["head"]),
-        body: json["body"] == null ? null : InitiateTransactionResponseBody.fromJson(json["body"]),
-        status: json["status"],
-        code: json["code"],
-        messages: json["messages"] == null
-            ? []
-            : List<String>.from(json["messages"]!.map((x) => x)),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "head": head?.toJson(),
-        "body": body?.toJson(),
-        "status": status,
-        "code": code,
-        "messages":
-            messages == null ? [] : List<dynamic>.from(messages!.map((x) => x)),
-      };
-}
-
-class InitiateTransactionResponseBody {
-  int? trxStatusId;
-  String? trxStatus;
-  String? trxId;
-  String? trxToken;
+  int? actionId;
   bool? authenticated;
-  int? timestamp;
   bool? isTokenExpired;
   Order? order;
+  int? timestamp;
+  String? trxId;
+  String? trxStatus;
+  int? trxStatusId;
+  String? trxToken;
 
-  InitiateTransactionResponseBody({
-    this.trxStatusId,
-    this.trxStatus,
-    this.trxId,
-    this.trxToken,
+  InitiateTransactionResponse({
+    this.actionId,
     this.authenticated,
-    this.timestamp,
     this.isTokenExpired,
     this.order,
+    this.timestamp,
+    this.trxId,
+    this.trxStatus,
+    this.trxStatusId,
+    this.trxToken,
   });
 
-  factory InitiateTransactionResponseBody.fromRawJson(String str) => InitiateTransactionResponseBody.fromJson(json.decode(str));
+  factory InitiateTransactionResponse.fromRawJson(String str) => InitiateTransactionResponse.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory InitiateTransactionResponseBody.fromJson(Map<String, dynamic> json) => InitiateTransactionResponseBody(
-        trxStatusId: json["trxStatusId"],
-        trxStatus: json["trxStatus"],
-        trxId: json["trxId"],
-        trxToken: json["trxToken"],
-        authenticated: json["authenticated"],
-        timestamp: json["timestamp"],
-        isTokenExpired: json["isTokenExpired"],
-        order: json["order"] == null ? null : Order.fromJson(json["order"]),
-      );
+  factory InitiateTransactionResponse.fromJson(Map<String, dynamic> json) => InitiateTransactionResponse(
+    actionId: json["actionId"],
+    authenticated: json["authenticated"],
+    isTokenExpired: json["isTokenExpired"],
+    order: json["order"] == null ? null : Order.fromJson(json["order"]),
+    timestamp: json["timestamp"],
+    trxId: json["trxId"],
+    trxStatus: json["trxStatus"],
+    trxStatusId: json["trxStatusId"],
+    trxToken: json["trxToken"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "trxStatusId": trxStatusId,
-        "trxStatus": trxStatus,
-        "trxId": trxId,
-        "trxToken": trxToken,
-        "authenticated": authenticated,
-        "timestamp": timestamp,
-        "isTokenExpired": isTokenExpired,
-        "order": order?.toJson(),
-      };
+    "actionId": actionId,
+    "authenticated": authenticated,
+    "isTokenExpired": isTokenExpired,
+    "order": order?.toJson(),
+    "timestamp": timestamp,
+    "trxId": trxId,
+    "trxStatus": trxStatus,
+    "trxStatusId": trxStatusId,
+    "trxToken": trxToken,
+  };
 }
 
 class Order {
-  String? appId;
-  String? orderId;
   Amount? amount;
-  String? description;
+  String? appId;
   String? callBackUrl;
   DateTime? creationDate;
+  String? description;
   OrderDetails? orderDetails;
+  String? orderId;
+  String? orderType;
 
   Order({
-    this.appId,
-    this.orderId,
     this.amount,
-    this.description,
+    this.appId,
     this.callBackUrl,
     this.creationDate,
+    this.description,
     this.orderDetails,
+    this.orderId,
+    this.orderType,
   });
 
   factory Order.fromRawJson(String str) => Order.fromJson(json.decode(str));
@@ -113,37 +78,35 @@ class Order {
   String toRawJson() => json.encode(toJson());
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
-        appId: json["appId"],
-        orderId: json["orderId"],
-        amount: json["amount"] == null ? null : Amount.fromJson(json["amount"]),
-        description: json["description"],
-        callBackUrl: json["callBackUrl"],
-        creationDate: json["creationDate"] == null
-            ? null
-            : DateTime.parse(json["creationDate"]),
-        orderDetails: json["orderDetails"] == null
-            ? null
-            : OrderDetails.fromJson(json["orderDetails"]),
-      );
+    amount: json["amount"] == null ? null : Amount.fromJson(json["amount"]),
+    appId: json["appId"],
+    callBackUrl: json["callBackUrl"],
+    creationDate: json["creationDate"] == null ? null : DateTime.parse(json["creationDate"]),
+    description: json["description"],
+    orderDetails: json["orderDetails"] == null ? null : OrderDetails.fromJson(json["orderDetails"]),
+    orderId: json["orderId"],
+    orderType: json["orderType"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "appId": appId,
-        "orderId": orderId,
-        "amount": amount?.toJson(),
-        "description": description,
-        "callBackUrl": callBackUrl,
-        "creationDate": creationDate?.toIso8601String(),
-        "orderDetails": orderDetails?.toJson(),
-      };
+    "amount": amount?.toJson(),
+    "appId": appId,
+    "callBackUrl": callBackUrl,
+    "creationDate": creationDate?.toIso8601String(),
+    "description": description,
+    "orderDetails": orderDetails?.toJson(),
+    "orderId": orderId,
+    "orderType": orderType,
+  };
 }
 
 class Amount {
-  int? value;
   String? currency;
+  int? value;
 
   Amount({
-    this.value,
     this.currency,
+    this.value,
   });
 
   factory Amount.fromRawJson(String str) => Amount.fromJson(json.decode(str));
@@ -151,49 +114,44 @@ class Amount {
   String toRawJson() => json.encode(toJson());
 
   factory Amount.fromJson(Map<String, dynamic> json) => Amount(
-        value: json["value"],
-        currency: json["currency"],
-      );
+    currency: json["currency"],
+    value: json["value"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "value": value,
-        "currency": currency,
-      };
+    "currency": currency,
+    "value": value,
+  };
 }
 
 class OrderDetails {
-  OrderDetails();
+  String? currency;
+  String? id;
+  List<List<List<List<dynamic>>>>? products;
+  int? totalPrice;
 
-  factory OrderDetails.fromRawJson(String str) =>
-      OrderDetails.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory OrderDetails.fromJson(Map<String, dynamic> json) => OrderDetails();
-
-  Map<String, dynamic> toJson() => {};
-}
-
-class Head {
-  String? signature;
-  String? requestTimestamp;
-
-  Head({
-    this.signature,
-    this.requestTimestamp,
+  OrderDetails({
+    this.currency,
+    this.id,
+    this.products,
+    this.totalPrice,
   });
 
-  factory Head.fromRawJson(String str) => Head.fromJson(json.decode(str));
+  factory OrderDetails.fromRawJson(String str) => OrderDetails.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory Head.fromJson(Map<String, dynamic> json) => Head(
-        signature: json["signature"],
-        requestTimestamp: json["requestTimestamp"],
-      );
+  factory OrderDetails.fromJson(Map<String, dynamic> json) => OrderDetails(
+    currency: json["Currency"],
+    id: json["Id"],
+    products: json["Products"] == null ? [] : List<List<List<List<dynamic>>>>.from(json["Products"]!.map((x) => List<List<List<dynamic>>>.from(x.map((x) => List<List<dynamic>>.from(x.map((x) => List<dynamic>.from(x.map((x) => x)))))))),
+    totalPrice: json["TotalPrice"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "signature": signature,
-        "requestTimestamp": requestTimestamp,
-      };
+    "Currency": currency,
+    "Id": id,
+    "Products": products == null ? [] : List<dynamic>.from(products!.map((x) => List<dynamic>.from(x.map((x) => List<dynamic>.from(x.map((x) => List<dynamic>.from(x.map((x) => x)))))))),
+    "TotalPrice": totalPrice,
+  };
 }

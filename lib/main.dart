@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:bas_sdk/bas_sdk.dart';
@@ -62,8 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String _authCode = 'AuthId:';
   String? _orderId;
-  InitiateTransactionResponseBody _transaction =
-      InitiateTransactionResponseBody();
+  InitiateTransactionResponse _transaction = InitiateTransactionResponse();
   String? _status;
   UserInfo _userInfo = UserInfo();
   String trxToken = '';
@@ -217,10 +217,12 @@ class _MyHomePageState extends State<MyHomePage> {
           customerInfo: _userInfo.data,
           amount: OrderAmount(currency: 'YER', value: 1000),
           orderId: getOrderId());
+      LOGW("Order : ${order.toRawJson()}");
 
       var initTrans = await restClient.getPayment(order: order);
-      trxToken = initTrans.body!.trxToken!;
-      LOGW(initTrans.toRawJson());
+      LOGW("initTrans : $initTrans");
+      LOGW("json.encode(initTrans) : ${json.encode(initTrans)}");
+      trxToken = initTrans.trxToken!;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -229,12 +231,12 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
         setState(() {
-          _transaction = initTrans.body!;
+          _transaction = initTrans;
         });
       }
 
       var data = await bas.payment(
-          amount: initTrans.body!.order!.amount!.value.toString(),
+          amount: initTrans.order!.amount!.value.toString(),
           orderId: getOrderId(),
           trxToken: trxToken,
           appId: UIData.BASAPPId);
@@ -277,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
       setState(() {
-        _transaction = orderStatus.body!;
+        _transaction = orderStatus;
       });
     } on Exception catch (e) {
       LOGW('ERROR onStatus : $e');
