@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'dart:math';
 
 import 'package:bas_sdk/bas_sdk.dart';
@@ -69,6 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
   UserInfo _userInfo = UserInfo();
   String trxToken = '';
   bool loading = false;
+  bool isLoggined = false;
+  bool isPaid = false;
+  bool isChecked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -119,21 +121,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    "User Info : ${_userInfo.toRawJson()}",
+                    "User Info : ${isLoggined ? _userInfo.toRawJson() : 'Not Loggined'}",
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    "Transaction Data : ${_transaction.toRawJson()}",
+                    "Transaction Data : ${isPaid ? _transaction.toRawJson() : 'Not Paid'}",
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    "Order Status : ${_status.toRawJson()}",
+                    "Order Status : ${isChecked ? _status.toRawJson() : 'Not Checked'}",
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
@@ -143,6 +145,17 @@ class _MyHomePageState extends State<MyHomePage> {
   onLogin() async {
     if (kDebugMode) {
       print("Login");
+    }
+    if (isLoggined) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Already Login'),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+      }
+      return;
     }
     try {
       if (mounted) {
@@ -195,6 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       if (mounted) {
         setState(() {
+          isLoggined = true;
           loading = false;
         });
       }
@@ -219,6 +233,17 @@ class _MyHomePageState extends State<MyHomePage> {
   onPayment() async {
     LOGW("onPayment");
     try {
+      if (isPaid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Already Paid'),
+              backgroundColor: Colors.orangeAccent,
+            ),
+          );
+        }
+        return;
+      }
       if (mounted) {
         setState(() {
           loading = true;
@@ -274,6 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (mounted) {
         setState(() {
           loading = false;
+          isPaid = true;
         });
       }
     } on Exception catch (e) {
@@ -298,6 +324,11 @@ class _MyHomePageState extends State<MyHomePage> {
     LOGW("onStatus");
 
     try {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
       var orderStatus = await restClient.getStatus(orderId: getOrderId());
       LOGW(orderStatus.toRawJson());
       if (mounted) {
@@ -309,10 +340,20 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
-      setState(() {
-        _status = orderStatus;
-      });
+
+      if (mounted) {
+        setState(() {
+          _status = orderStatus;
+          isChecked = true;
+          loading = false;
+        });
+      }
     } on Exception catch (e) {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
       LOGW('ERROR onStatus : $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
