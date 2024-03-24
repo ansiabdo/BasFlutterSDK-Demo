@@ -145,7 +145,12 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Login");
     }
     try {
-      loading = true;
+      if (mounted) {
+        setState(() {
+          loading = true;
+        });
+      }
+
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
       LOGW(data.toString());
@@ -188,9 +193,17 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         }
       }
-      loading = false;
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     } catch (e) {
-      loading = false;
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
       LOGW('ERROR BasSDK : $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -206,7 +219,11 @@ class _MyHomePageState extends State<MyHomePage> {
   onPayment() async {
     LOGW("onPayment");
     try {
-      loading = true;
+      if (mounted) {
+        setState(() {
+          loading = true;
+        });
+      }
       var order = OrderCheckOut(
           orderDetails: [
             OrderDetail(
@@ -254,9 +271,17 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
-      loading = false;
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     } on Exception catch (e) {
-      loading = false;
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
       LOGW('ERROR onPayment : $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
