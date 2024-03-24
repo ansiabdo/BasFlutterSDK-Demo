@@ -147,14 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Login");
     }
     if (isLoggined) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Already Login'),
-            backgroundColor: Colors.orangeAccent,
-          ),
-        );
-      }
+      showMsg('Already Login', Colors.orangeAccent);
       return;
     }
     try {
@@ -166,15 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
-      LOGW(data.toString());
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('BasSDK Auth Data :${data.toString()}'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      showMsg('BasSDK Auth Data :${data.toString()}', Colors.green);
       if (data != null) {
         setState(() {
           _authCode = 'AuthId :${data.data!.authId!}';
@@ -185,26 +170,9 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           _userInfo = userInfo;
         });
-        LOGW('BasSDK UserInfo Data');
-        LOGW(userInfo.toRawJson());
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('BasSDK UserInfo Data :${userInfo.toRawJson()}'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+        showMsg('BasSDK UserInfo Data :${userInfo.toRawJson()}', Colors.green);
       } else {
-        LOGW('ERROR BasSDK Data is null : $data');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('ERROR BasSDK Data is null :${data.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        showMsg('ERROR BasSDK Data is null :${data.toString()}', Colors.red);
       }
       if (mounted) {
         setState(() {
@@ -218,15 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
           loading = false;
         });
       }
-      LOGW('ERROR BasSDK : $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ERROR BasSDK :${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      showMsg('ERROR BasSDK :${e.toString()}', Colors.red);
     }
   }
 
@@ -234,14 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
     LOGW("onPayment");
     try {
       if (isPaid) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Already Paid'),
-              backgroundColor: Colors.orangeAccent,
-            ),
-          );
-        }
+        showMsg('Already Paid', Colors.orangeAccent);
         return;
       }
       if (mounted) {
@@ -267,16 +220,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
       var initTrans = await restClient.getPayment(order: order);
       LOGW("initTrans : $initTrans");
-      LOGW("json.encode(initTrans) : ${json.encode(initTrans)}");
-
       trxToken = initTrans.trxToken!;
+      showMsg('BasSDK initTrans Data :${initTrans.toRawJson()}', Colors.green);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('BasSDK initTrans Data :${initTrans.toRawJson()}'),
-            backgroundColor: Colors.green,
-          ),
-        );
         setState(() {
           _transaction = initTrans;
         });
@@ -287,15 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
           orderId: getOrderId(),
           trxToken: trxToken,
           appId: UIData.BASAPPId);
-      LOGW("bas.payment : $data");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('BasSDK payment Data :$data'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      showMsg('BasSDK payment Data :$data', Colors.green);
       if (mounted) {
         setState(() {
           loading = false;
@@ -308,15 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
           loading = false;
         });
       }
-      LOGW('ERROR onPayment : $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ERROR onPayment :${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      showMsg('ERROR onPayment :${e.toString()}', Colors.red);
     }
   }
 
@@ -331,16 +261,8 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       var orderStatus = await restClient.getStatus(orderId: getOrderId());
       LOGW(orderStatus.toRawJson());
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text('BasSDK orderStatus Data :${orderStatus.toRawJson()}'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-
+      showMsg(
+          'BasSDK orderStatus Data :${orderStatus.toRawJson()}', Colors.green);
       if (mounted) {
         setState(() {
           _status = orderStatus;
@@ -354,15 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
           loading = false;
         });
       }
-      LOGW('ERROR onStatus : $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('ERROR onStatus :${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      showMsg('ERROR onStatus :${e.toString()}', Colors.red);
     }
   }
 
@@ -373,5 +287,17 @@ class _MyHomePageState extends State<MyHomePage> {
     var random = Random();
     _orderId = '1111${random.nextInt(1000000)}';
     return _orderId;
+  }
+
+  showMsg(String msg, Color color) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: color,
+        ),
+      );
+    }
+    LOGW(msg);
   }
 }
