@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'dart:math';
 
 import 'package:bas_sdk/bas_sdk.dart';
@@ -67,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   InitiateTransactionResponse _status = InitiateTransactionResponse();
   UserInfo _userInfo = UserInfo();
   String trxToken = '';
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -75,63 +77,67 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
         ),
-        body: ListView(children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                FilledButton(
-                    onPressed: onLogin, child: const Text("BasGate Auth")),
+        body: loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      FilledButton(
+                          onPressed: onLogin,
+                          child: const Text("BasGate Auth")),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      FilledButton(
+                        onPressed: onPayment,
+                        child: const Text("BasGate Payment"),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: onStatus,
+                        child: const Text("BasGate Status")),
+                  ],
+                ),
                 const SizedBox(
-                  width: 16,
+                  height: 32,
                 ),
-                FilledButton(
-                  onPressed: onPayment,
-                  child: const Text("BasGate Payment"),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "AuthId : $_authCode",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
                 ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                  onPressed: onStatus, child: const Text("BasGate Status")),
-            ],
-          ),
-          const SizedBox(
-            height: 32,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "AuthId : $_authCode",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "User Info : ${_userInfo.toRawJson()}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Transaction Data : ${_transaction.toRawJson()}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              "Order Status : ${_status.toRawJson()}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-        ]));
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "User Info : ${_userInfo.toRawJson()}",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "Transaction Data : ${_transaction.toRawJson()}",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "Order Status : ${_status.toRawJson()}",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ]));
   }
 
   onLogin() async {
@@ -139,6 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Login");
     }
     try {
+      loading = true;
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
       LOGW(data.toString());
@@ -181,7 +188,9 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         }
       }
+      loading = false;
     } catch (e) {
+      loading = false;
       LOGW('ERROR BasSDK : $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -197,6 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
   onPayment() async {
     LOGW("onPayment");
     try {
+      loading = true;
       var order = OrderCheckOut(
           orderDetails: [
             OrderDetail(
@@ -244,7 +254,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
       }
+      loading = false;
     } on Exception catch (e) {
+      loading = false;
       LOGW('ERROR onPayment : $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
