@@ -79,10 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
         ),
-        body: loading
-            ? const Center(child: CircularProgressIndicator())
-            : ListView(children: [
-                Padding(
+        body: ListView(children: [
+          loading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -100,46 +100,45 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                        onPressed: onStatus,
-                        child: const Text("BasGate Status")),
-                  ],
-                ),
-                const SizedBox(
-                  height: 32,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "AuthId : $_authCode",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "User Info : ${isLoggined ? _userInfo.toRawJson() : 'Not Loggined'}",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "Transaction Data : ${isPaid ? _transaction.toRawJson() : 'Not Paid'}",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "Order Status : ${isChecked ? _status.toRawJson() : 'Not Checked'}",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-              ]));
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                  onPressed: onStatus, child: const Text("BasGate Status")),
+            ],
+          ),
+          const SizedBox(
+            height: 32,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "AuthId : $_authCode",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "User Info : ${isLoggined ? _userInfo.toRawJson() : 'Not Loggined'}",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Transaction Data : ${isPaid ? _transaction.toRawJson() : 'Not Paid'}",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              "Order Status : ${isChecked ? _status.toRawJson() : 'Not Checked'}",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ]));
   }
 
   onLogin() async {
@@ -151,20 +150,15 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
     try {
-      if (mounted) {
-        setState(() {
-          loading = true;
-        });
-      }
-
+      setLoading(true);
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
       showMsg('BasSDK Auth Data :${data.toString()}', Colors.green);
       if (data != null) {
         setState(() {
-          _authCode = 'AuthId :${data.data!.authId!}';
+          _authCode = data.data!.authId!;
         });
-        LOGW("BasAuthCode Ready");
+        showMsg("BasAuthCode Ready", Colors.green);
         var userInfo = await restClient.getUserInfo(authId: data.data!.authId!);
 
         setState(() {
@@ -174,18 +168,10 @@ class _MyHomePageState extends State<MyHomePage> {
       } else {
         showMsg('ERROR BasSDK Data is null :${data.toString()}', Colors.red);
       }
-      if (mounted) {
-        setState(() {
-          isLoggined = true;
-          loading = false;
-        });
-      }
+      isLoggined = true;
+      setLoading(false);
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+      setLoading(false);
       showMsg('ERROR BasSDK :${e.toString()}', Colors.red);
     }
   }
@@ -197,11 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
         showMsg('Already Paid', Colors.orangeAccent);
         return;
       }
-      if (mounted) {
-        setState(() {
-          loading = true;
-        });
-      }
+      setLoading(true);
       var order = OrderCheckOut(
           orderDetails: [
             OrderDetail(
@@ -234,18 +216,11 @@ class _MyHomePageState extends State<MyHomePage> {
           trxToken: trxToken,
           appId: UIData.BASAPPId);
       showMsg('BasSDK payment Data :$data', Colors.green);
-      if (mounted) {
-        setState(() {
-          loading = false;
-          isPaid = true;
-        });
-      }
+
+      isPaid = true;
+      setLoading(false);
     } on Exception catch (e) {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+      setLoading(false);
       showMsg('ERROR onPayment :${e.toString()}', Colors.red);
     }
   }
@@ -254,28 +229,19 @@ class _MyHomePageState extends State<MyHomePage> {
     LOGW("onStatus");
 
     try {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+      setLoading(false);
       var orderStatus = await restClient.getStatus(orderId: getOrderId());
-      LOGW(orderStatus.toRawJson());
       showMsg(
           'BasSDK orderStatus Data :${orderStatus.toRawJson()}', Colors.green);
       if (mounted) {
         setState(() {
           _status = orderStatus;
           isChecked = true;
-          loading = false;
         });
       }
+      setLoading(false);
     } on Exception catch (e) {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
+      setLoading(false);
       showMsg('ERROR onStatus :${e.toString()}', Colors.red);
     }
   }
@@ -299,5 +265,13 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
     LOGW(msg);
+  }
+
+  setLoading(bool status) {
+    if (mounted) {
+      setState(() {
+        loading = status;
+      });
+    }
   }
 }
