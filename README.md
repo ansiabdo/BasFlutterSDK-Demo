@@ -18,10 +18,10 @@ samples, guidance on mobile development, and a full API reference.
 
 
 ```bash
-flutter build web --release;firebase deploy --only hosting:basfluttersdk
+flutter build web --release;firebase deploy --only hosting:basfluttersdk  --project ykbbas
 ```
 ```bash
-flutter clean ;  flutter build bundle ; flutter build web --release;firebase deploy --only hosting:basfluttersdk
+flutter clean ;  flutter build bundle ; flutter build web --release;firebase deploy --only hosting:basfluttersdk  --project ykbbas
 ```
 ```bash
 flutter run -d chrome 

@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Bas SDK Flutter Demo v0.2'),
+      home: const MyHomePage(title: 'Bas SDK Flutter Demo v0.3'),
     );
   }
 }
