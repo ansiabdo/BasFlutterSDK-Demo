@@ -38,7 +38,7 @@ dependencies:
   bas_sdk:
     git:
       url: https://github.com/ansiabdo/bas_sdk.git
-
+      ref: 'production'
   http:
 
 dev_dependencies:

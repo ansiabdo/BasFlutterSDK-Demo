@@ -13,11 +13,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: de5903dce227a5bdf6272353b3a612c82da35484
+      ref: production
+      resolved-ref: e43403a8f8dafbe264755b3a2db96d4398b57fc8
       url: "https://github.com/ansiabdo/bas_sdk.git"
     source: git
-    version: "0.0.1"
+    version: "0.0.2"
   boolean_selector:
     dependency: transitive
     description:
