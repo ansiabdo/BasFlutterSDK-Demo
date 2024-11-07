@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class InitiateTransactionResponse {
-  String? appId;
+  String? actionId;
   bool? authenticated;
   bool? isTokenExpired;
   Order? order;
@@ -12,7 +12,7 @@ class InitiateTransactionResponse {
   String? trxToken;
 
   InitiateTransactionResponse({
-    this.appId,
+    this.actionId,
     this.authenticated,
     this.isTokenExpired,
     this.order,
@@ -30,7 +30,7 @@ class InitiateTransactionResponse {
 
   factory InitiateTransactionResponse.fromJson(Map<String, dynamic> json) =>
       InitiateTransactionResponse(
-        appId: json["appId"],
+        actionId: json["actionId"],
         authenticated: json["authenticated"],
         isTokenExpired: json["isTokenExpired"],
         order: json["order"] == null ? null : Order.fromJson(json["order"]),
@@ -42,6 +42,7 @@ class InitiateTransactionResponse {
       );
 
   Map<String, dynamic> toJson() => {
+        "actionId": actionId,
         "authenticated": authenticated,
         "isTokenExpired": isTokenExpired,
         "order": order?.toJson(),
