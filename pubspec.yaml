@@ -37,8 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.6
   bas_sdk:
     git:
-      url: https://github.com/ansiabdo/bas_sdk.git
-      ref: 'production'
+      url: https://github.com/basgate/bas_flutter_sdk.git
+      ref: 'master'
   http:
 
 dev_dependencies:

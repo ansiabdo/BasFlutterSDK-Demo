@@ -8,14 +8,14 @@ import 'model/InitiateTransactionResponse.dart';
 import 'model/UserInfo.dart';
 import 'api_response.dart';
 
-class RestClient {
-  RestClient({required this.httpClient});
+class MerchantAPIHelper {
+  MerchantAPIHelper({required this.httpClient});
 
-  static const String baseUrl = 'https://bas-node-sdk.onrender.com';
+  static const String merchantAPIBaseURL = 'https://bas-node-sdk.onrender.com';
   final http.Client httpClient;
 
   Future<UserInfo> getUserInfo({required String authId}) async {
-    const loginUrl = '$baseUrl/auth/userinfo';
+    const loginUrl = '$merchantAPIBaseURL/auth/userinfo';
     final loginResult = await postAsync<dynamic>(loginUrl, {"authid": authId});
 
     if (!loginResult.success!) {
@@ -26,7 +26,7 @@ class RestClient {
 
   Future<InitiateTransactionResponse> getPayment(
       {required OrderCheckOut order}) async {
-    const url = '$baseUrl/order/checkout';
+    const url = '$merchantAPIBaseURL/order/checkout';
     final result = await postAsync<dynamic>(url, order);
     LOGW("getPayment result : ${result.success}");
 
@@ -41,7 +41,7 @@ class RestClient {
 
   Future<InitiateTransactionResponse> getStatus(
       {required String orderId}) async {
-    var url = '$baseUrl/order/status/$orderId';
+    var url = '$merchantAPIBaseURL/order/status/$orderId';
     final result = await getAsync<dynamic>(url);
 
     if (!result.success!) {

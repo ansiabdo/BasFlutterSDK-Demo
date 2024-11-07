@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Bas SDK Flutter Demo v0.3'),
+      home: const MyHomePage(title: 'Bas SDK Flutter Demo v0.6'),
     );
   }
 }
@@ -56,7 +56,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final RestClient restClient = RestClient(
+  final MerchantAPIHelper merchantAPIHelper = MerchantAPIHelper(
     httpClient: http.Client(),
   );
   BasSDK bas = BasSDK();
@@ -151,15 +151,21 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     try {
       setLoading(true);
+      //------------- START BasSDK-Client AuthID --------------------
       BasSDK bas = BasSDK();
       var data = await bas.fetchAuthCode(clientId: UIData.BASClientId);
+      //------------- END BasSDK-Client AuthID --------------------
       showMsg('BasSDK Auth Data :${data.toString()}', Colors.green);
       if (data != null) {
         setState(() {
           _authCode = data.data!.authId!;
         });
         showMsg("BasAuthCode Ready", Colors.green);
-        var userInfo = await restClient.getUserInfo(authId: data.data!.authId!);
+
+        //------------- START GetUserInfo From Your API Server --------------------
+        var userInfo =
+            await merchantAPIHelper.getUserInfo(authId: data.data!.authId!);
+        //------------- END GetUserInfo From Your API Server --------------------
 
         setState(() {
           _userInfo = userInfo;
@@ -200,21 +206,32 @@ class _MyHomePageState extends State<MyHomePage> {
           orderId: getOrderId());
       LOGW("Order : ${order.toRawJson()}");
 
-      var initTrans = await restClient.getPayment(order: order);
-      LOGW("initTrans : $initTrans");
-      trxToken = initTrans.trxToken!;
-      showMsg('BasSDK initTrans Data :${initTrans.toRawJson()}', Colors.green);
-      if (mounted) {
-        setState(() {
-          _transaction = initTrans;
-        });
+      //------------- START initPayment/checkOut From Your API Server --------------------
+      var initTrans;
+      try {
+        initTrans = await merchantAPIHelper.getPayment(order: order);
+        LOGW("initTrans : $initTrans");
+        trxToken = initTrans.trxToken!;
+        showMsg(
+            'BasSDK initTrans Data :${initTrans.toRawJson()}', Colors.green);
+        if (mounted) {
+          setState(() {
+            _transaction = initTrans;
+          });
+        }
+      } on Exception catch (e) {
+        LOGW("ERROR :$e");
+        showMsg('ERROR onPayment :${e.toString()}', Colors.red);
+        setLoading(false);
       }
-
+      //------------- START BasSDK-Client Payment --------------------
       var data = await bas.payment(
           amount: initTrans.order!.amount!.value.toString(),
           orderId: getOrderId(),
           trxToken: trxToken,
           appId: UIData.BASAPPId);
+      //------------- END BasSDK-Client Payment --------------------
+
       showMsg('BasSDK payment Data :$data', Colors.green);
 
       isPaid = true;
@@ -230,7 +247,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     try {
       setLoading(false);
-      var orderStatus = await restClient.getStatus(orderId: getOrderId());
+      var orderStatus =
+          await merchantAPIHelper.getStatus(orderId: getOrderId());
       showMsg(
           'BasSDK orderStatus Data :${orderStatus.toRawJson()}', Colors.green);
       if (mounted) {
